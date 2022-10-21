@@ -9,6 +9,7 @@ import './styles.css'
 //     <App />
 //   </React.StrictMode>
 // );
+//v17.0.2
 ReactDOM.render(
   <React.StrictMode>
     <App />
