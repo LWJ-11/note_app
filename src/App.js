@@ -1,4 +1,5 @@
-import React from "react"
+import React, { useEffect } from "react"
+import { useState } from "react"
 import Sidebar from "./components/Sidebar"
 import Editor from "./components/Editor"
 import { data } from "./data"
@@ -6,11 +7,17 @@ import Split from "react-split"
 import {nanoid} from "nanoid"
 
 function App() {
-    const [notes, setNotes] = React.useState([])
-    const [currentNoteId, setCurrentNoteId] = React.useState(
+    const [notes, setNotes] = useState( 
+        () => JSON.parse(localStorage.getItem("notes"))
+        || [])
+    const [currentNoteId, setCurrentNoteId] = useState(
         (notes[0] && notes[0].id) || ""
     )
-  
+
+    useEffect(() => {
+        localStorage.setItem("notes", JSON.stringify(notes))
+    }, [notes])
+    
     function createNewNote() {
         const newNote = {
             id: nanoid(),
@@ -21,16 +28,33 @@ function App() {
     }
   
     function updateNote(text) {
-        setNotes(oldNotes => oldNotes.map(oldNote => {
-            console.log(oldNote.id === currentNoteId
-                ? { ...oldNote, body: text }
-                : oldNote)
-            return oldNote.id === currentNoteId
-                ? { ...oldNote, body: text }
-                : oldNote
-        }))
+        //Try to rearrange the most current-modified note
+        setNotes(oldNotes => {
+            const newNotes = []
+            for(let i=0; i<oldNotes.length;i++){
+                const oldNote = oldNotes[i]
+                if(oldNote.id === currentNoteId)
+                    newNotes.unshift({...oldNote, body: text })
+                else
+                    newNotes.push(oldNote)
+            }
+            return newNotes;
+        })
     }
+    //This function work but missing rearrange
+    // function updateNote(text) {
+    //     setNotes(oldNotes => oldNotes.map(oldNote => {
+    //         return oldNote.id === currentNoteId
+    //             ? { ...oldNote, body: text }
+    //             : oldNote
+    //     }))
+    // }
   
+    function deleteNote(event, noteId){
+        event.stopPropagation()
+        setNotes(oldNote => oldNote.filter(note => note.id !==noteId))
+    }
+
     function findCurrentNote() {
         return notes.find(note => {
             return note.id === currentNoteId
@@ -52,6 +76,7 @@ function App() {
                     currentNote={findCurrentNote()}
                     setCurrentNoteId={setCurrentNoteId}
                     newNote={createNewNote}
+                    deleteNote = {deleteNote}
                 />
                 {
                     currentNoteId && 
@@ -72,7 +97,6 @@ function App() {
                     Create one now
                 </button>
             </div>
-            
         }
         </main>
     )

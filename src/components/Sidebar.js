@@ -1,5 +1,7 @@
 import React from "react"
-
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { faTimes } from "@fortawesome/free-solid-svg-icons"
+ 
 export default function Sidebar(props) {
     const noteElements = props.notes.map((note, index) => (
         <div key={note.id}>
@@ -9,7 +11,16 @@ export default function Sidebar(props) {
                 }`}
                 onClick={() => props.setCurrentNoteId(note.id)}
             >
-                <h4 className="text-snippet">Note {index + 1}</h4>
+                <h4 className="text-snippet">{note.body.split("\n")[0]}</h4>
+                <button
+                    className="delete-btn"
+                    onClick={(event)=>props.deleteNote(event, note.id)}
+                >
+                     <FontAwesomeIcon 
+                        icon={faTimes} 
+                        className="trash-icon"
+                />
+                </button>
             </div>
         </div>
     ))
